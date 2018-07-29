@@ -61,14 +61,76 @@ S.search({ type: 'track', query: songName}, function(err, data) {
       } 
   });
 }
- 
+ function getMovie(){
 
-request('http://www.omdbapi.com/?t=pulp+fiction', function (error, response, body) {
-  console.log('error:', error); // Print the error if one occurred
-  console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-  console.log('body:', body); // Print the HTML for the Google homepage.
-});
-  
+ var movieName= "";
+ var inputs = process.argv;
+
+for(var i = 3; i<inputs.length; i++){
+  movieName += inputs[i] + " ";
+};
+
+movieName = movieName.trim();
+
+fs.appendFile("log.txt", ["\n", process.argv[2], movieName], function(err){
+  if (err) throw err;
+})
+
+
+
+var params = {
+  "apiKey":  "43fa6835",
+  "title":    movieName
+
+};
+
+
+omdb.get(params, function(err, movie){
+
+  if (err){
+    return console.error(err);
+  }
+
+  else{
+  var splitStr = movieName.toLowerCase().split(' ');
+  for (var i = 0; i < splitStr.length; i++) {
+      splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
+  }
+  movieName = splitStr.join(' ');
+  console.log("\n" + movie.Title) + (" (" + movie.Year + ")");
+  console.log("\nIMDB Rating: " + movie.imdbRating);
+  console.log("Rotten Tomatoes: " + movie.Ratings[1].Value);
+  console.log("Country: " + movie.Country);
+  console.log("Language: " + movie.Language);
+  console.log("\n" + movie.Plot);
+  console.log("\nActors: " + movie.Actors);
+  console.log("\n************************************************************************************************************************");
+    }
+  });
+ }
+
+
+
+
+ var doWhatItSays = function(){
+ fs.readFile('random.txt', 'utf8', function (err, data) {
+  if (err) throw err;
+ 
+  var dataArr = data.split(",");
+
+if(dataArr.length ==2){
+  pick(dataArr[0], dataArr[1]);
+}else if (dataArr.length == 1){
+  pick(dataArr[1])
+}
+
+  });
+ }
+
+
+
+
+
 
 var pick = function(caseData, functionData) {
   switch(caseData){
@@ -77,6 +139,12 @@ var pick = function(caseData, functionData) {
     break;
     case 'spotify-this-song' :
     getMeSpotify(functionData)
+    break;
+    case 'what-movie' :
+    getMovie();
+    break;
+    case "do-what-it-says" :
+    doWhatItSays();
     break;
   default:
   console.log("Liri doesn't know how to do that!")
